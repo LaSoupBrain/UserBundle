@@ -24,11 +24,35 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  */
 class User implements UserInterface, \Serializable
 {
+    /**
+     * Default password.
+     */
+    const USER_DEFAULT_PASSWORD = 'root';
+
+    /**
+     * Default email.
+     */
+    const USER_DEFAULT_EMAIL = 'superadmin@admin.com';
+
+    /**
+     * Prefix of slug id.
+     */
+    const SLUG_ID_PREFIX = 'us';
+
+    /**
+     * To set an user to super admin role.
+     */
+    const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
 
     /**
      * To set an user to admin role.
      */
     const ROLE_ADMIN = 'ROLE_ADMIN';
+
+    /**
+     * To set an user to user role.
+     */
+    const ROLE_USER = 'ROLE_USER';
 
     /**
      * Error message for image validation.
@@ -296,7 +320,7 @@ class User implements UserInterface, \Serializable
     /**
      * @var string
      *
-     * @ORM\Column(name="slugId", type="string", length=180, unique=true, nullable=true)
+     * @ORM\Column(name="slugId", type="string", length=180, unique=true)
      */
     private $slugId;
 
@@ -313,7 +337,7 @@ class User implements UserInterface, \Serializable
      *
      * @return int
      */
-    public function getId()
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -321,9 +345,9 @@ class User implements UserInterface, \Serializable
     /**
      * get username.
      *
-     * @return string
+     * @return null|string
      */
-    public function getUsername()
+    public function getUsername(): ?string
     {
         return $this->username;
     }
@@ -332,20 +356,22 @@ class User implements UserInterface, \Serializable
      * set username.
      *
      * @param string $username
+     *
      * @return User
      */
     public function setUsername($username)
     {
         $this->username = $username;
+
         return $this;
     }
 
     /**
      * get password.
      *
-     * @return string
+     * @return null|string
      */
-    public function getPassword()
+    public function getPassword(): ?string
     {
         return $this->password;
     }
@@ -354,11 +380,13 @@ class User implements UserInterface, \Serializable
      * set password.
      *
      * @param string $password
+     *
      * @return User
      */
     public function setPassword($password)
     {
         $this->password = $password;
+
         return $this;
     }
 
@@ -372,11 +400,13 @@ class User implements UserInterface, \Serializable
 
     /**
      * @param mixed $oldPassword
+     *
      * @return User
      */
     public function setOldPassword($oldPassword)
     {
         $this->oldPassword = $oldPassword;
+
         return $this;
     }
 
@@ -390,11 +420,13 @@ class User implements UserInterface, \Serializable
 
     /**
      * @param mixed $newPassword
+     *
      * @return User
      */
     public function setNewPassword($newPassword)
     {
         $this->newPassword = $newPassword;
+
         return $this;
     }
 
@@ -412,11 +444,13 @@ class User implements UserInterface, \Serializable
      * set email.
      *
      * @param string $email
+     *
      * @return User
      */
     public function setEmail($email)
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -448,6 +482,7 @@ class User implements UserInterface, \Serializable
     public function getRoles()
     {
         $roles = $this->roles;
+
         return $roles;
     }
 
@@ -455,10 +490,14 @@ class User implements UserInterface, \Serializable
      * set roles.
      *
      * @param array $roles
+     *
+     * @return User
      */
     public function setRoles(array $roles)
     {
         $this->roles = $roles;
+
+        return $this;
     }
 
     public function eraseCredentials()
@@ -530,7 +569,7 @@ class User implements UserInterface, \Serializable
     /**
      * Get hoverAvatar.
      *
-     * @return string
+     * @return null|string
      */
     public function getHoverAvatar()
     {
@@ -554,7 +593,7 @@ class User implements UserInterface, \Serializable
     /**
      * Get avatar.
      *
-     * @return string
+     * @return null|string
      */
     public function getAvatar()
     {
@@ -578,9 +617,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get firstName.
      *
-     * @return string
+     * @return null|string
      */
-    public function getFirstName()
+    public function getFirstName(): ?string
     {
         return $this->firstName;
     }
@@ -602,9 +641,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get middleName
      *
-     * @return string
+     * @return null|string
      */
-    public function getMiddleName()
+    public function getMiddleName(): ?string
     {
         return $this->middleName;
     }
@@ -626,9 +665,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get lastName
      *
-     * @return string
+     * @return null|string
      */
-    public function getLastName()
+    public function getLastName(): ?string
     {
         return $this->lastName;
     }
@@ -650,9 +689,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get designation
      *
-     * @return string
+     * @return null|string
      */
-    public function getDesignation()
+    public function getDesignation(): ?string
     {
         return $this->designation;
     }
@@ -674,9 +713,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get startedAt
      *
-     * @return \DateTime
+     * @return null|\DateTime
      */
-    public function getStartedAt()
+    public function getStartedAt(): ?\DateTime
     {
         return $this->startedAt;
     }
@@ -698,9 +737,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get location
      *
-     * @return string
+     * @return null|string
      */
-    public function getLocation()
+    public function getLocation(): ?string
     {
         return $this->location;
     }
@@ -722,9 +761,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get skype
      *
-     * @return string
+     * @return null|string
      */
-    public function getSkype()
+    public function getSkype(): ?string
     {
         return $this->skype;
     }
@@ -746,9 +785,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get slack
      *
-     * @return string
+     * @return null|string
      */
-    public function getSlack()
+    public function getSlack(): ?string
     {
         return $this->slack;
     }
@@ -770,9 +809,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get description
      *
-     * @return string
+     * @return null|string
      */
-    public function getDescription()
+    public function getDescription(): ?string
     {
         return $this->description;
     }
@@ -781,11 +820,13 @@ class User implements UserInterface, \Serializable
      * set isActive
      *
      * @param string $isActive
+     *
      * @return User
      */
     public function setIsActive($isActive)
     {
         $this->isActive = $isActive;
+
         return $this;
     }
 
@@ -808,7 +849,7 @@ class User implements UserInterface, \Serializable
      *
      * @return \DateTime
      */
-    public function getCreatedAt()
+    public function getCreatedAt(): ?\DateTime
     {
         return $this->createdAt;
     }
@@ -823,15 +864,16 @@ class User implements UserInterface, \Serializable
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 
     /**
      * Get updatedAt
      *
-     * @return \DateTime
+     * @return null|\DateTime
      */
-    public function getUpdatedAt()
+    public function getUpdatedAt(): ?\DateTime
     {
         return $this->updatedAt;
     }
@@ -853,9 +895,9 @@ class User implements UserInterface, \Serializable
     /**
      * Get token
      *
-     * @return string
+     * @return null|string
      */
-    public function getToken()
+    public function getToken(): ?string
     {
         return $this->token;
     }
@@ -908,4 +950,3 @@ class User implements UserInterface, \Serializable
         return $this->slugId;
     }
 }
-

@@ -3,11 +3,10 @@
 namespace Dtw\UserBundle\Controller;
 
 use Dtw\UserBundle\Entity\User;
-use Dtw\UserBundle\Form\RegistrationForm;
-use Dtw\UserBundle\Utils\PaginationUtils;
 use Dtw\UserBundle\Form\UserEditForm;
 use Dtw\UserBundle\Form\UserForm;
 use Dtw\UserBundle\Form\UserPasswordForm;
+use Dtw\UserBundle\Utils\PaginationUtils;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,37 +24,35 @@ class UserController extends Controller
      */
     const ERROR_MESSAGE = 'There was an error occurred. Please kindly contact PHP DEVELOPER TEAM';
 
-	/**
-	 * Render the user list.
-	 *
-	 * @author Richard Soliven
-	 *
-	 * @return \Symfony\Component\HttpFoundation\Response
-	 */
-	public function indexAction(int $currentPage = PaginationUtils::DEFAULT_PAGE)
-	{
-		try {
-			$userManager = $this->get('manager.user');
-			$users = $userManager->getByBatch($currentPage);
-			$totalPages = $userManager->getTotalPages();
+    /**
+     * Render the user list.
+     *
+     * @author Richard Soliven
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function indexAction(int $currentPage = PaginationUtils::DEFAULT_PAGE)
+    {
+        try {
+            $userManager = $this->get('manager.user');
 
-			return $this->render(
-				'@DtwUser/User/list.html.twig',
-				array(
-					'users' => $users,
-					'currentPage' => $currentPage,
-					'totalPages' => $totalPages
-				)
-			);
-		} catch (\Exception $e) {
-			$this->addFlash(
-				'error',
-				self::ERROR_MESSAGE
-			);
-			
-			throw new \Exception('Internal Server Error!');
-		}
-	}
+            return $this->render(
+                '@DtwUser/User/list.html.twig',
+                array(
+                    'users' => $userManager->getByBatch($currentPage),
+                    'currentPage' => $currentPage,
+                    'totalPages' => $userManager->getTotalPages()
+                )
+            );
+        } catch (\Exception $e) {
+            $this->addFlash(
+                'error',
+                self::ERROR_MESSAGE
+            );
+
+            throw new \Exception('Internal Server Error!');
+        }
+    }
 
     /**
      * Render the create form.
@@ -67,15 +64,13 @@ class UserController extends Controller
     public function renderCreateAction()
     {
         try {
-            $formCreate = $this->createForm(
-                UserForm::class,
-                new User()
-            );
-
             return $this->render(
                 '@DtwUser/User/create.html.twig',
                 array(
-                    'formCreate' => $formCreate->createView()
+                    'formCreate' => $this->createForm(
+                        UserForm::class,
+                        new User()
+                    )->createView()
                 )
             );
         } catch (\Exception $e) {
@@ -110,11 +105,7 @@ class UserController extends Controller
                 try {
                     $this
                         ->get('manager.user')
-                        ->setUser($user)
-                        ->createPassword()
-                        ->create()
-                        ->save()
-                        ->getUser();
+                        ->create($user);
 
                     $this->addFlash(
                         'success',
@@ -162,28 +153,22 @@ class UserController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function renderEditAction($slugId)
+    public function renderEditAction(string $slugId)
     {
         try {
-            $user = $this
-                ->get('manager.user')
-                ->getBySlugId($slugId);
-
-            if(empty($user)) {
+            if(empty($user = $this->get('manager.user')->getBySlugId($slugId))) {
                 $this->addFlash(
                     'error',
                     'User not exist'
                 );
             } else {
-                $formEdit = $this->createForm(
-                    UserEditForm::class,
-                    $user
-                );
-
                 $response = $this->render(
                     '@DtwUser/User/update.html.twig',
                     array(
-                        'formEdit' => $formEdit->createView(),
+                        'formEdit' => $this->createForm(
+                            UserEditForm::class,
+                            $user
+                        )->createView(),
                         'user' => $user
                     )
                 );
@@ -208,20 +193,13 @@ class UserController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function updateAction(Request $request, $slugId)
+    public function updateAction(Request $request, string $slugId)
     {
         if ($request->getMethod() === 'POST') {
             try {
                 $userManager = $this->get('manager.user');
 
-                $user = $this
-                    ->get('manager.user')
-                    ->getBySlugId($slugId);
-
-                $oldAvatar = $user->getAvatar();
-                $oldHoverAvatar = $user->getHoverAvatar();
-
-                if (empty($user->getSlugId())) {
+                if (empty($user = $this->get('manager.user')->getBySlugId($slugId))) {
                     $this->addFlash(
                         'error',
                         self::ERROR_MESSAGE
@@ -229,19 +207,27 @@ class UserController extends Controller
 
                     return $this->redirectToRoute('dtw_user_index');
                 } else {
+                    $oldAvatar = $user->getAvatar();
+                    $oldHoverAvatar = $user->getHoverAvatar();
+                    $oldName = sprintf('%s %s %s',
+                        $user->getFirstName(),
+                        $user->getMiddleName(),
+                        $user->getLastName()
+                    );
+
                     $formEdit = $this->createForm(
                         UserEditForm::class,
                         $user
                     )->HandleRequest($request);
 
                     if ($formEdit->isSubmitted() && $formEdit->isValid()) {
-                        $user = $userManager
-                            ->setUser($formEdit->getData())
-                            ->update()
-                            ->updateAvatar($oldAvatar)
-                            ->updateHoverAvatar($oldHoverAvatar)
-                            ->save()
-                            ->getUser();
+                        $userManager
+                            ->update(
+                                $formEdit->getData(),
+                                $oldName,
+                                $oldAvatar,
+                                $oldHoverAvatar,
+                            );
 
                         $this->addFlash(
                             'success',
@@ -293,11 +279,7 @@ class UserController extends Controller
     public function renderRemoveAction($slugId)
     {
         try {
-            $user = $this
-                ->get('manager.user')
-                ->getBySlugId($slugId);
-
-            if (empty($user)) {
+            if (empty($user = $this->get('manager.user')->getBySlugId($slugId))) {
                 $this->addFlash(
                     'error',
                     'User not exist'
@@ -333,21 +315,19 @@ class UserController extends Controller
     {
         try {
             $userManager = $this->get('manager.user');
-            $user = $userManager->getBySlugId($slugId);
-            if(empty($user)) {
+
+            if (empty($user = $userManager->getBySlugId($slugId))) {
                 $this->addFlash(
                     'error',
                     'User not exist'
                 );
             } else {
-                $userManager
-                    ->setUser($user)
-                    ->remove();
+                $userManager->delete($user);
 
                 $this->addFlash(
                     'success',
-                    sprintf('%s sucessfully deleted.',
-                        $userManager->getFullName()
+                    sprintf('User ID %s sucessfully deleted.',
+                        $slugId
                     )
                 );
             }
@@ -371,11 +351,7 @@ class UserController extends Controller
     public function showAction($slugId)
     {
         try {
-            $user = $this
-                ->get('manager.user')
-                ->getBySlugId($slugId);
-
-            if(empty($user)) {
+            if (empty($user = $this->get('manager.user')->getBySlugId($slugId))) {
                 $this->addFlash(
                     'error',
                     'User not exist'
@@ -413,6 +389,7 @@ class UserController extends Controller
             $user = $this
                 ->get('manager.user')
                 ->getByToken($token);
+
         } catch (\Exception $e) {
             $this->addFlash(
                 'error',
@@ -459,11 +436,7 @@ class UserController extends Controller
                     )->HandleRequest($request);
 
                     if ($formEdit->isSubmitted() && $formEdit->isValid()) {
-                        $userManager
-                            ->setUser($formEdit->getData())
-                            ->updatePassword()
-                            ->removeToken()
-                            ->save();
+                        $userManager->updatePassword($formEdit->getData());
 
                         return $this->render('@DtwUser/Security/reset_password_success.html.twig');
                     }

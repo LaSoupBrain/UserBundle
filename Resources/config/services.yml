@@ -17,6 +17,9 @@ services:
   manager.user:
     class: Dtw\UserBundle\Manager\UserManager
 
+  operation.user:
+    class: Dtw\UserBundle\Operation\UserOperation
+
   Dtw\UserBundle\Utils\SlugUtils:
     public: false
 
@@ -34,4 +37,7 @@ services:
     public: false
 
   Dtw\UserBundle\Utils\PaginationUtils:
+    public: false
+
+  Dtw\UserBundle\Operation\UserOperation:
     public: false

@@ -2,797 +2,273 @@
 
 namespace Dtw\UserBundle\Manager;
 
-use Doctrine\Bundle\DoctrineCacheBundle\Tests\Functional\FileSystemCacheTest;
-use Doctrine\ORM\EntityManagerInterface;
-use Dtw\UserBundle\Utils\DatabaseUtils;
-use Dtw\UserBundle\Utils\EmailUtils;
-use Dtw\UserBundle\Utils\SlugUtils;
-use Dtw\UserBundle\Utils\TokenUtils;
-use Dtw\UserBundle\Utils\PaginationUtils;
 use Dtw\UserBundle\Entity\User;
-use Psr\Container\ContainerInterface;
-use Doctrine\ORM\NoResultException;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Filesystem\Filesystem;
+use Dtw\UserBundle\Operation\UserOperation;
 
 /**
  * Class UserManager
  *
  * @package Dtw\UserBundle\Manager
  *
- * @author Richard Soliven
+ * @author Ali, Muamar
  */
 class UserManager
 {
     /**
-     * @var EntityManagerInterface
+     * @var UserOperation
      */
-    private $em;
-
-    /**
-     * @var SlugUtils
-     */
-    private $slugUtils;
-
-    /**
-     * @var User
-     */
-    private $user;
-
-    /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
-     * @var DatabaseUtils
-     */
-    private $databaseUtils;
-
-    /**
-     * @var TokenUtils
-     */
-    private $tokenUtils;
-
-    /**
-     * @var UserPasswordEncoderInterface
-     */
-    private $passwordEncoder;
-
-    /**
-     * @var Filesystem
-     */
-    private $fileSystem;
-
-    /**
-     * @var EmailUtils
-     */
-    private $emailUtils;
-
-	/**
-	 * @var PaginationUtils
-	 */
-	private $paginationUtils;
+    private $userOperation;
 
     /**
      * UserManager constructor.
      *
-     * @param EntityManagerInterface $em
-     * @param SlugUtils $slugUtils
-     * @param ContainerInterface $container
-     * @param DatabaseUtils $databaseUtils
-     * @param UserPasswordEncoderInterface $passwordEncoder
-     * @param Filesystem $fileSystem
-     * @param EmailUtils $emailUtils
-     * @param TokenUtils $tokenUtils
-	 * @param \DtwCoreBundle\Utils\PaginationUtils $paginationUtils
-     */
-    public function __construct(
-        EntityManagerInterface $em,
-        SlugUtils $slugUtils,
-        ContainerInterface $container,
-        DatabaseUtils $databaseUtils,
-        UserPasswordEncoderInterface $passwordEncoder,
-        Filesystem $fileSystem,
-        EmailUtils $emailUtils,
-        TokenUtils $tokenUtils,
-		PaginationUtils $paginationUtils
-    ) {
-        $this->em = $em;
-        $this->slugUtils = $slugUtils;
-        $this->container = $container;
-        $this->databaseUtils = $databaseUtils;
-        $this->passwordEncoder = $passwordEncoder;
-        $this->emailUtils = $emailUtils;
-        $this->fileSystem = $fileSystem;
-        $this->tokenUtils = $tokenUtils;
-		$this->paginationUtils = $paginationUtils;
-    }
-
-    /**
-     * Get the user.
+     * @param UserOperation $userOperation
      *
-     * @author Richard Soliven
-     *
-     * @return User
+     * @author Ali, Muamar
      */
-    public function getUser(): User
+    public function __construct(UserOperation $userOperation)
     {
-        return $this->user;
+        $this->userOperation = $userOperation;
     }
 
     /**
-     * Set the user.
+     * Creation of user.
      *
-     * @param User $user
-     *
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function setUser(User $user): UserManager
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * Return all the existing user from the database.
+     * @param User $user | user to be created.
      *
      * @throws \Exception
-     * @author Richard Soliven
+     * @author Ali, Muamar
      *
-     * @return mixed
+     * @return UserOperation
      */
-    public function getAll()
+    public function create(User $user): UserOperation
     {
         try {
             return $this
-                ->em
-                ->getRepository(User::class)
-                ->getAll();
-
+                ->userOperation
+                ->setUser($user)
+                ->createPassword()
+                ->create()
+                ->save();
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the fetching all users in the database.'
+                'An error occurred at creating of user.'
             );
         }
     }
 
     /**
-     * Get all the active user of the team.
+     * Create admin
      *
-     * @param int $teamId the id of the current team.
+     * @param User $user | user entity to be create.
+     * @param string $email inputted email.
+     * @param string $password inputted password.
      *
      * @throws \Exception
-     * @author  Richard Soliven
+     * @author Ali Muamar
      *
-     * @return array
+     * @return UserManager
      */
-    public function getAllActived(int $teamId): array
+    public function createAdminDefault(
+        User $user,
+        string $email,
+        string $password
+    ): UserManager
+    {
+        try {
+            $this
+                ->userOperation
+                ->setUser($user)
+                ->createDefault(
+                    $email,
+                    $password
+                )
+                ->create()
+                ->save();
+        } catch (\Exception $e) {
+            throw new \Exception(
+                'An error occurred at creating admin default.'
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Check if the entered email is already exist in database or not.
+     *
+     * @param string $email email of the user.
+     *
+     * @throws \Exception
+     * @author Ali, Muamar
+     *
+     * @return bool
+     */
+    public function isEmailExist(string $email)
+    {
+        try {
+            return $this->userOperation->isEmailExist($email);
+        } catch (\Exception $e) {
+            throw new \Exception(
+                'An error occurred at checking if email exist.'
+            );
+        }
+    }
+
+    /**
+     * Updating of user.
+     *
+     * @param User $user | user to be update.
+     * @param string $oldName | old user full name.
+     * @param string $oldAvatar | old avatar image.
+     * @param string $oldHoverAvatar | old hover avatar image.
+     *
+     * @throws \Exception
+     * @author Ali, Muamar
+     *
+     *
+     * @return UserOperation
+     */
+    public function update(
+        User $user,
+        string $oldName,
+        string $oldAvatar = null,
+        string $oldHoverAvatar = null
+    )
     {
         try {
             return $this
-                ->em
-                ->getRepository(User::class)
-                ->getAllActived($teamId);
-
+                ->userOperation
+                ->setUser($user)
+                ->updateSlug($oldName)
+                ->updateAvatar($oldAvatar)
+                ->updateHoverAvatar($oldHoverAvatar)
+                ->save();
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the fetching all users in the database.'
+                'An error occurred at updating of user.'
             );
         }
     }
 
     /**
-     * Return all the existing email of user from the database.
+     * Removing of user.
+     *
+     * @param User $user | user to be remove.
      *
      * @throws \Exception
-     * @author Richard Soliven
+     * @author Ali, Muamar
      *
-     * @return mixed
+     * @return UserOperation
      */
-    public function isEmailExist($email): User
+    public function delete(User $user): UserOperation
     {
         try {
-            return $this
-                ->em
-                ->getRepository(User::class)
-                ->isEmailExist($email);
-
-        } catch (\NoResultException $e) {
-            return null;
+            return $this->userOperation->remove($user);
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the fetching all users in the database.'
+                'An error occurred at removing of user.'
             );
         }
     }
 
     /**
-     * Creation of the user account.
+     * Getting full name of user.
      *
      * @throws \Exception
-     *
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function create(): UserManager
-    {
-        try {
-            if ($this->user->getRoles() == null) {
-                $this->user->setRoles(array(User::ROLE_ADMIN));
-            }
-            $this->generateSlugId();
-            $this->generateSlug();
-            $this->setAvatar();
-            $this->setHoverAvatar();
-            $this->user->setUsername($this->user->getEmail());
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'The worker can\t be created, no name in the user. the slug can\'t be generated'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Uploads the hover avatar of a user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function setAvatar(): UserManager
-    {
-        try {
-            if (($avatar = $this->user->getAvatar()) instanceof UploadedFile) {
-                $avatarFileName = md5(uniqid()) . '.' . $avatar->guessExtension();
-                $avatar->move(
-                    $this->container->getParameter('user_directory'),
-                    $avatarFileName);
-
-                $this->user->setAvatar($avatarFileName);
-            }
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'An error occurred while uploading the user avatar.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Uploads the hover avatar of a user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function setHoverAvatar(): UserManager
-    {
-        try {
-            if (($avatarHover = $this->user->getHoverAvatar()) instanceof UploadedFile) {
-                $hoverAvatarFileName = md5(uniqid()) . '.' . $avatarHover->guessExtension();
-                $avatarHover->move(
-                    $this->container->getParameter('user-hover_directory'),
-                    $hoverAvatarFileName);
-
-                $this->user->setHoverAvatar($hoverAvatarFileName);
-            }
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'An error occurred while uploading hover avatar of a user.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Generating the slug id of the user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function generateSlugId(): UserManager
-    {
-        $userId = $this->entityCount($this->user);
-
-        try {
-            if ($userId <= 0) {
-                $userId++;
-
-                $this
-                    ->user
-                    ->setSlugId(
-                        $this
-                            ->slugUtils
-                            ->slugifyId($userId, 'u')
-                    );
-            } else {
-                $result = ltrim(
-                    $this
-                        ->getLastCreated()
-                        ->getSlugId(),
-                    'u'
-                );
-                $deSlugId = intval(ltrim($result, '0'));
-
-                $deSlugId++;
-
-                $this
-                    ->user
-                    ->setSlugId(
-                        $this
-                            ->slugUtils
-                            ->slugifyId($deSlugId, 'u')
-                    );
-            }
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'There\s an error in creating the slug id'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Counts the rows.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return int
-     */
-    public function entityCount(): int
-    {
-        try {
-            return $this
-                ->em
-                ->getRepository(User::class)
-                ->getRowCount();
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'Error occurred while retrieving the row count.'
-            );
-        }
-    }
-
-    /**
-     * Get the last created tag.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return mixed
-     */
-    public function getLastCreated()
-    {
-        try {
-            return $this
-                ->em
-                ->getRepository(User::class)
-                ->getLastCreated();
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'Error occurred while getting the last created user.'
-            );
-        }
-    }
-
-    /**
-     * Generating the slug name of the user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function generateSlug(): UserManager
-    {
-        $fullName = $this->getFullName($this->user);
-
-        if (empty($fullName)) {
-            throw new \Exception('The slug can\t be created, no Name found.');
-        } else {
-            try {
-                $this
-                    ->user
-                    ->setSlug(
-                        $this
-                            ->slugUtils
-                            ->slugify($fullName)
-                    );
-            } catch (\Exception $e) {
-                throw new \Exception('There\s an error in creating the slug.');
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Gets and concatenates the First name, middle name, and last name with spaces.
-     *
-     * @author Richard Soliven
+     * @author Ali, Muamar
      *
      * @return string
      */
-    public function getFullName()
-    {
-        return sprintf('%s %s %s',
-            $this->user->getFirstName(),
-            $this->user->getMiddleName(),
-            $this->user->getLastName()
-        );
-    }
-
-    /**
-     * Update the Avatar.
-     *
-     * @param string|null $oldAvatar
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function updateAvatar(string $oldAvatar = null): UserManager
+    public function getFullName(): string
     {
         try {
-            if ($this->user->getAvatar() === null) {
-                $this->user->setAvatar($oldAvatar);
-            } else {
-                if(!empty($oldAvatar)) {
-                    $this->deleteAvatar($oldAvatar);
-                }
-                $this->setAvatar();
-            }
+            return $this->userOperation->getFullName();
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the editing avatar of an user.'
+                'An error occurred at getting of full name.'
             );
         }
-
-        return $this;
     }
 
     /**
-     * Update the HoverAvatar.
+     * Getting of user by slug id.
      *
-     * @param string $oldHoverAvatar
+     * @param string $slugId | slug id of the user.
      *
      * @throws \Exception
-     * @auhtor Richard Soliven
+     * @author Ali, Muamar
      *
-     * @return UserManager
-     */
-    public function updateHoverAvatar(string $oldHoverAvatar = null): UserManager
-    {
-        try {
-            if ($this->user->getHoverAvatar() === null) {
-                $this
-                    ->user
-                    ->setHoverAvatar($oldHoverAvatar);
-            } else {
-                if(!empty($oldHoverAvatar)) {
-                    $this->deleteHoverAvatar($oldHoverAvatar);
-                }
-                $this->setHoverAvatar();
-            }
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'An error occurred at the editing hover avatar of an user.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Generating the encrypted password.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function createPassword(): UserManager
-    {
-        try {
-            $userPassword = $this->user->getPassword();
-            if (empty($userPassword)) {
-                throw new \Exception('Password field is null.');
-            } else {
-                $password = $this->passwordEncoder->encodePassword($this->user, $userPassword, null);
-
-                $this->user->setPassword($password);
-            }
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'Password field must have value.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Edit a user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function update(): UserManager
-    {
-        try {
-            $this->generateSlug();
-            $this->user->setUsername($this->user->getEmail());
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'An error occurred at the creation of an user.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Editing the user password.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function updatePassword(): UserManager
-    {
-        try {
-            $encodedPassword = $this->passwordEncoder->encodePassword(
-                $this->user,
-                $this
-                    ->user
-                    ->getNewPassword()
-            );
-
-            $this
-                ->user
-                ->setPassword($encodedPassword);
-        } catch (\Exception $e) {
-            throw new \Exception('Password not match to your current password.');
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set password in user entity.
-     *
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function setPassword(): UserManager
-    {
-        try {
-            $encodedPassword = $this->passwordEncoder->encodePassword(
-                $this->user,
-                $this
-                    ->user
-                    ->getPassword()
-            );
-
-            $this
-                ->user
-                ->setPassword($encodedPassword);
-        } catch (\Exception $e) {
-            throw new $e;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Get the user by the slug id.
-     *
-     * @param string $slugId The slugId of the user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return User
+     * @return User|null
      */
     public function getBySlugId(string $slugId): ?User
     {
         try {
-            $user = $this
-                ->em
-                ->getRepository(User::class)
-                ->findOneBy(
-                    array(
-                        'slugId' => $slugId
-                    )
-                );
+            return $this->userOperation->getBySlugId($slugId);
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the getting the slug id of an user.'
+                'An error occurred at getting of user by slug id.'
             );
         }
-
-        return $user;
     }
 
     /**
-     * Delete a image of avatar.
+     * Get by batch of users by specific page.
      *
-     * @param string $oldAvatar this is the old avatar.
+     * @param int $currentPage | The current page for pagination.
      *
      * @throws \Exception
-     * @author Richard Soliven
+     * @author Ali Muamar
      *
-     * @return mixed
+     * @return array
      */
-    public function deleteAvatar(string $oldAvatar): UserManager
+    public function getByBatch(int $currentPage): array
     {
         try {
-            $this->fileSystem->remove(
-                $this->container->getParameter('user_directory')
-                . DIRECTORY_SEPARATOR
-                . $oldAvatar
-            );
+            return $this->userOperation->getByBatch($currentPage);
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the deletion of avatar.'
+                'An error occurred at fetching users by page.'
             );
         }
-
-        return $this;
     }
 
     /**
-     * Delete a image of hover avatar.
-     *
-     * @param string $oldHoverAvatar this is the old hover avatar.
+     * Get the total pages.
      *
      * @throws \Exception
-     * @author Richard Soliven
+     * @author Ali, Muamar
      *
-     * @return mixed
+     * @return int
      */
-    public function deleteHoverAvatar(string $oldHoverAvatar): UserManager
+    public function getTotalPages(): int
     {
         try {
-            $this->fileSystem->remove(
-                $this->container->getParameter('user-hover_directory')
-                . DIRECTORY_SEPARATOR
-                . $oldHoverAvatar
-            );
+            return $this->userOperation->getTotalPages();
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the deletion of hover avatar.'
+                'An error occurred at getting the total pages.'
             );
         }
-
-        return $this;
     }
 
     /**
-     * Remove the token of the user.
+     * Validate the entered email.
+     *
+     * @param $email
      *
      * @throws \Exception
-     * @author  Richard Soliven
+     * @author Ali, Muamar
      *
      * @return UserManager
      */
-    public function removeToken(): UserManager
+    public function validateEmail($email): UserManager
     {
         try {
-            $this->user->setToken("");
+            $this->userOperation->validateEmail($email);
         } catch (\Exception $e) {
             throw new \Exception(
-                'Can\'t generate token.'
-            );
-        }
-        return $this;
-    }
-
-
-    /**
-     * Set the new token for the user.
-     *
-     * @throws \Exception
-     * @author  Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function setToken(): UserManager
-    {
-        // @Todo When we wil addd the class beetwen controller and manager, pass as parameter the token to this function
-        try {
-            $this
-                ->user
-                ->setToken(
-                    $this
-                        ->tokenUtils
-                        ->generateToken()
-                );
-        } catch (\Exception $e) {
-            echo $e->getMessage();die();
-            throw new \Exception(
-                'Can\'t generate token.'
-            );
-        }
-
-        return $this;
-    }
-
-    /**
-     * Delete a user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function remove(): UserManager
-    {
-        $this
-            ->databaseUtils
-            ->remove($this->user);
-
-        return $this;
-    }
-
-    /**
-     * Save a user.
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return UserManager
-     */
-    public function save(): UserManager
-    {
-        $this
-            ->databaseUtils
-            ->save($this->user);
-
-        return $this;
-    }
-
-    /**
-     * Sending of email to the users email
-     *
-     * @param string $email the email of current user
-     * @param User $user the current user
-     *
-     * @throws \Exception
-     * @author Richard Soliven
-     *
-     * @return User
-     */
-    public function sendMailResetPassword(string $email, User $user): UserManager
-    {
-        try {
-            $this
-                ->emailUtils
-                ->resetPassword($email, $user);
-        } catch (\Exception $e) {
-            throw new \Exception(
-                'Can\'t send email.'
+                'An error occurred at checking if valid email.'
             );
         }
 
@@ -802,78 +278,97 @@ class UserManager
     /**
      * Get the token of the current user.
      *
-     * @param string $token is for the reset password.
+     * @param string $token
      *
      * @throws \Exception
-     * @author Richard Soliven
      *
-     * @return User
+     * @return User|null
      */
-    public function getByToken(string $token): User
+    public function getByToken(string $token): ?User
     {
         try {
-            $user = $this
-                ->em
-                ->getRepository(User::class)
-                ->findOneBy(
-                    array(
-                        'token' => $token
-                    )
-                );
+            return $this->userOperation->getByToken($token);
         } catch (\Exception $e) {
             throw new \Exception(
-                'An error occurred at the getting the slug id of an user.'
+                'An error occurred at the getting token of user.'
+            );
+        }
+    }
+
+    /**
+     * Reset password email.
+     *
+     * @param User $user | user to be reset.
+     *
+     * @throws \Exception
+     *
+     * @return UserOperation
+     */
+    public function resetPasswordEmail(User $user)
+    {
+        try {
+            return $this
+                ->userOperation
+                ->setUser($user)
+                ->setToken()
+                ->save()
+                ->sendMailResetPassword($user->getEmail(), $user);
+        } catch (\Exception $e) {
+            throw new \Exception(
+                'An error occurred at the resetting password.'
             );
         }
 
-        return $user;
     }
 
-	/**
-	 * Get by batch of users by specific page.
-	 *
-	 * @param int $currentPage The current page for pagination.
-	 *
-	 * @throws \Exception
-	 * @author Richard
-	 *
-	 * @return array
-	 */
-	public function getByBatch(int $currentPage): array
-	{
-		try {
-			return $this
-				->em
-				->getRepository(User::class)
-				->getByBatch(
-					$this
-						->paginationUtils
-						->batchStartFrom($currentPage),
-					PaginationUtils::BATCH_LIMIT
-				);
-		} catch (\Exception $e) {
-			throw new \Exception(
-				'An error occurred at fetching users by page.'
-			);
-		}
-	}
+    /**
+     * Updating the password after sending of reset password.
+     *
+     * @param User $user | user need to be update password.
+     *
+     * @throws \Exception
+     *
+     * @return UserOperation
+     */
+    public function updatePassword(User $user)
+    {
+        try {
+            return $this
+                ->userOperation
+                ->setUser($user)
+                ->updatePassword()
+                ->removeToken()
+                ->save();
+        } catch (\Exception $e) {
+            throw new \Exception(
+                'An error occurred at the updatting of password.'
+            );
+        }
+    }
 
-	/**
-	 * Get the total pages.
-	 *
-	 * @throws \Exception
-	 * @author Richard
-	 *
-	 * @return int
-	 */
-	public function getTotalPages(): int
-	{
-		try {
-			return $this->paginationUtils->getTotalPages(count($this->getAll()));
-		} catch (\Exception $e) {
-			throw new \Exception(
-				'An error occurred at getting the total pages.'
-			);
-		}
-	}
+    /**
+     * Create user from registration.
+     *
+     * @param User $user | user need to be registered.
+     *
+     * @throws \Exception
+     * @author Ali, Muamar
+     *
+     * @return UserOperation
+     */
+    public function registerUser(User $user)
+    {
+        try {
+            return $this
+                ->userOperation
+                ->setUser($user->setWeight(1))
+                ->createPassword()
+                ->create()
+                ->save();
+        } catch (\Exception $e) {
+            throw new \Exception(
+                'An error occurred at the updatting of password.'
+            );
+        }
+    }
 }

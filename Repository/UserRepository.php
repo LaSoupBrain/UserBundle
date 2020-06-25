@@ -123,4 +123,25 @@ class UserRepository extends \Doctrine\ORM\EntityRepository
 			->getQuery()
 			->getResult();
 	}
+
+    /**
+     * Returns the slug as a reference
+     *
+     * @param string $slug | the slug.
+     *
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @author Ali, Muamar
+     *
+     * @return null|User
+     */
+    public function getBySlug(string $slug): ?User
+    {
+        return $this
+            ->createQueryBuilder(User::SLUG_ID_PREFIX)
+            ->where(User::SLUG_ID_PREFIX . '.slug = :slug')
+            ->setParameter('slug', $slug)
+            ->getQuery()
+            ->getSingleResult();
+    }
 }

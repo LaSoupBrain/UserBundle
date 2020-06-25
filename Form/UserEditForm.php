@@ -41,11 +41,9 @@ class UserEditForm extends AbstractType
                     'multiple' => true,
                     'expanded' => true,
                     'choices' => [
-                        'SuperAdmin' => 'ROLE_SUPER-ADMIN',
-                        'Admin' => 'ROLE_ADMIN',
-                        'Moderator' => 'ROLE_MODERATOR',
-                        'Creator' => 'ROLE_CREATOR',
-                        'User' => 'ROLE_USER',
+                        'SuperAdmin' => User::ROLE_SUPER_ADMIN,
+                        'Admin' => User::ROLE_ADMIN,
+                        'User' => User::ROLE_USER,
                     ],
                 ]
             )

@@ -111,11 +111,7 @@ class SecurityController extends Controller
                         'error',
                         'Email not exist in the database');
                 } else {
-                    $userManager
-                        ->setUser($user)
-                        ->setToken()
-                        ->save()
-                        ->sendMailResetPassword($user->getEmail(), $user);
+                    $userManager->resetPasswordEmail($user);
 
                     $response = $this->render('@DtwUser/Security/email_sent.html.twig');
                 }
@@ -181,11 +177,7 @@ class SecurityController extends Controller
                 try {
                     $this
                         ->get('manager.user')
-                        ->setUser($user->setWeight(1))
-                        ->createPassword()
-                        ->create()
-                        ->save()
-                        ->getUser();
+                        ->registerUser($user);
 
                     $this->addFlash(
                         'success',
