@@ -1,0 +1,93 @@
+{% if totalPages >= 1 %}
+    <ul class="pagination">
+        {% set displayedPagesLimit = 3 %}
+        {% set firstPage = 1 %}
+        {% set prevPage = currentPage - 1 %}
+        {% set nextPage = currentPage + 1 %}
+        
+        <li class="pagination__item {{ currentPage is same as (firstPage) ? 'pagination__item--disabled': ''}}">
+            <a
+                {% if currentPage != firstPage %}
+                    href="{{ path(paginationPath, {'currentPage': firstPage }) }}"
+                {% endif %}
+                class="pagination__link"
+            >
+                First
+            </a>
+        </li>
+        <li class="pagination__item {{ currentPage is same as (firstPage) ? 'pagination__item--disabled': ''}}">
+            <a
+                {% if currentPage != firstPage %}
+                    href="{{ path(paginationPath, {'currentPage': prevPage }) }}"
+                {% endif %}
+                class="pagination__link"
+            >
+                Prev
+            </a>
+        </li>
+
+        {% for page in 1..totalPages %}
+            {% if 0 == (currentPage - displayedPagesLimit) - loop.index %}
+                {% if 1 != loop.index %}
+                    <li class="pagination__item">
+                        <a
+                            class="pagination__link"
+                        >
+                            ...
+                        </a>
+                    </li>
+                {% endif %}
+            {% elseif 0 == (currentPage + displayedPagesLimit) - loop.index  and (currentPage + displayedPagesLimit) < totalPages %}
+                <li class="pagination__item">
+                    <a
+                        class="pagination__link"
+                    >
+                        ...
+                    </a>
+                </li>
+            {% elseif 0 < (currentPage - displayedPagesLimit) - loop.index %}
+            {% elseif 0 > (currentPage + displayedPagesLimit) - loop.index %}
+            {% else %}
+                <li class="pagination__item {{ currentPage == loop.index ? 'pagination__item--active': ''}}">
+                    <a
+                        href="{{ path(paginationPath, {'currentPage': loop.index }) }}"
+                        class="pagination__link"
+                    >
+                        {{  loop.index }}
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if currentPage != totalPages  and (currentPage + displayedPagesLimit) < totalPages %}
+            <li class="pagination__item {{ currentPage == totalPages ? 'pagination__item--active': ''}}">
+                <a
+                    href="{{ path(paginationPath, {'currentPage': totalPages }) }}"
+                    class="pagination__link"
+                >
+                    {{ totalPages }}
+                </a>
+            </li>
+        {% endif %}
+        <li class="pagination__item {{ currentPage == totalPages ? 'pagination__item--disabled': ''}}">
+            <a
+                {% if currentPage != totalPages %}
+                    href="{{ path(paginationPath, {'currentPage': nextPage }) }}"
+                {% endif %}
+                class="pagination__link"
+            >
+                Next
+            </a>
+        </li>
+        <li class="pagination__item {% if currentPage == totalPages %} pagination__item--disabled {% endif %}">
+            <a
+                {% if currentPage != totalPages %}
+                    href="{{ path(paginationPath, {'currentPage': totalPages }) }}"
+                {% endif %}
+                class="pagination__link"
+            >
+                Last
+            </a>
+        </li>
+    </ul>
+{% endif %}

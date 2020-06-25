@@ -1,0 +1,36 @@
+{% extends "@DtwUser/Base/index.html.twig" %}
+{% block body %}
+    <div class="show-info">
+        <h3 class="title show-info__title">User Details</h3>
+        <br>
+        <p class="show-info__text"><strong>ID:        </strong> {{ user.id }}</p>
+        <p class="show-info__text"><strong>Username:  </strong> {{ user.username }}</p>
+        <p class="show-info__text"><strong>Email:     </strong> {{ user.email }}</p>
+        <p class="show-info__text"><strong>Role:      </strong>
+        {% if user.roles is empty %}
+            no role added yet for this user.
+        {% else %}
+            <ul>
+                {% for role in user.roles %}
+                  <li class="show-info__text">{{ role }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        </p>
+        <p class="show-info__text"><strong>Avatar:</strong></p>
+        <div class="show-info__img-holder">
+            <img src="{{ asset ('uploads/images/users/' ~ user.Avatar) }}" width="200" height="200">
+            <img src="{{ asset ('uploads/images/users/hover/' ~ user.hoverAvatar) }}" width="200" height="200">
+        </div>
+        <p class="show-info__text"><strong>Weight:</strong> {{ user.weight }}</p>
+        <p class="show-info__text"><strong>Name:</strong> {{ user.firstName }} {{ user.middleName }} {{ user.lastName }}</p>
+        <p class="show-info__text"><strong>Start Date:</strong> {{ user.startedAt |date('F j, Y') }}</p>
+        <p class="show-info__text"><strong>Designation:</strong> {{ user.designation }}</p>
+        <p class="show-info__text"><strong>Location:</strong> {{ user.location }}</p>
+        <p class="show-info__text"><strong>Slack:</strong> {{ user.slack }}</p>
+        <p class="show-info__text"><strong>Skype:</strong> {{ user.skype }}</p>
+        <p class="show-info__text"><strong>About:</strong></p>
+        <div class="show-info__description">{{ user.description|raw }}</div>
+        <p class="show-info__text"><strong>Date Created: </strong> {{ user.createdAt|date("m/d/Y") }}</p>
+    </div>
+{% endblock %}

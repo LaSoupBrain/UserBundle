@@ -1,0 +1,70 @@
+# Routing for the worker page under admin
+dtw_user_registration:
+  path:     /register
+  defaults: { _controller: DtwUserBundle:Security:renderRegistration }
+
+dtw_user_registered:
+  path:     /registered
+  defaults: { _controller: DtwUserBundle:Security:registered }
+
+dtw_user_forgot_password:
+  path:     /forgot-password
+  defaults: { _controller: DtwUserBundle:Security:forgotPassword }
+
+dtw_user_reset_password_email:
+  path:     /send-email
+  defaults: { _controller: DtwUserBundle:Security:sendResetPasswordEmail }
+
+dtw_user_reset_password:
+  path:     /resetpassword/{token}
+  defaults: { _controller: DtwUserBundle:User:editPassword }
+
+dtw_user_update_password:
+  path:     /updatepassword/{token}
+  defaults: { _controller: DtwUserBundle:User:updatePassword }
+
+dtw_user_login:
+  path:     /login
+  defaults: { _controller: DtwUserBundle:Security:login }
+
+dtw_user_logout:
+  path:     /logout
+  defaults: { _controller: DtwUserBundle:Security:logout }
+
+dtw_user_index:
+  path:     /
+  defaults: { _controller: DtwUserBundle:User:index }
+
+dtw_user_create:
+  path:     /create
+  defaults: { _controller: DtwUserBundle:User:renderCreate }
+
+dtw_user_add:
+  path:     /add
+  defaults: { _controller: DtwUserBundle:User:add }
+
+dtw_user_update:
+  path:     /update/{slugId}
+  defaults: { _controller: DtwUserBundle:User:update }
+
+dtw_user_edit:
+  path:     /edit/{slugId}
+  defaults: { _controller: DtwUserBundle:User:renderEdit }
+
+dtw_user_delete:
+  path:     /delete/{slugId}
+  defaults: { _controller: DtwUserBundle:User:delete }
+
+dtw_user_remove:
+  path:     /remove/{slugId}
+  defaults: {_controller: DtwUserBundle:User:renderRemove}
+
+dtw_user_pagination:
+  path:     /{currentPage}
+  defaults: { _controller: DtwUserBundle:User:index, currentPage: 1 }
+  requirements:
+    currentPage: '\d+'
+
+dtw_user_show:
+  path:     /{slugId}
+  defaults: {_controller: DtwUserBundle:User:show }

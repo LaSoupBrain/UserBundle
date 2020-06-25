@@ -1,0 +1,23 @@
+{
+  "name": "dtw/user",
+  "license": "MIT",
+  "type": "project",
+  "description": "The user bundle.",
+  "minimum-stability": "master",
+  "autoload": {
+    "psr-4": {
+      "": "/src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": { "Tests\\": "tests/" },
+    "files": [ "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ]
+  },
+  "repositories" : [{
+  }],
+  "extra" : {
+    "branch-alias" : {
+      "dev-master" : "develop"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: true
+
+  Dtw\UserBundle\Controller\UserController:
+    autowire: true
+    tags: ['controller.service_arguments']
+
+  Dtw\UserBundle\EventListener\EntitiesListener:
+    class: Dtw\UserBundle\EventListener\EntitiesListener
+    tags:
+      - { name: doctrine.event_listener, event: preUpdate }
+      - { name: doctrine.event_listener, event: prePersist }
+
+  manager.user:
+    class: Dtw\UserBundle\Manager\UserManager
+
+  Dtw\UserBundle\Utils\SlugUtils:
+    public: false
+
+  Dtw\UserBundle\Utils\StringUtils:
+    public: false
+
+  Dtw\UserBundle\Utils\DatabaseUtils:
+    public: false
+
+  Dtw\UserBundle\Utils\TokenUtils:
+    public: false
+
+  Dtw\UserBundle\Utils\EmailUtils:
+    arguments: ['%mailer_user_name%','%mailer_user%']
+    public: false
+
+  Dtw\UserBundle\Utils\PaginationUtils:
+    public: false

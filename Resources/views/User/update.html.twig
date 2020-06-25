@@ -1,0 +1,16 @@
+{% extends "@DtwUser/Base/index.html.twig" %}
+
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block body %}
+    <div class="show-info">
+        <h1 class="title show-info__title">Edit User</h1>
+        <p class="show-info__text">This page is for editing an user account</p>
+        {{ form_start(formEdit, {'action': path('dtw_user_update', {'slugId': formEdit.vars.value.slugId}), 'method': 'POST', 'attr' :{'novalidate':'novalidate', 'class': 'form__field', 'placeholder': 'Username'}}) }}
+        {{ form_end(formEdit) }}
+    </div>
+{% endblock body %}
+
+{% block javascripts %}
+{% endblock javascripts %}

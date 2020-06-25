@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1"
+    >
+
+    <title>
+        {% block title %}
+            Datawords
+        {% endblock title %}
+    </title>
+
+    {% block stylesheets %}
+    {% endblock stylesheets %}
+</head>
+<body>
+    {% if app.flashes('success') is defined %}
+        {% include '@DtwUser/Common/alerts/success.html.twig' %}
+    {% endif %}
+
+    {% if app.flashes('info') is defined %}
+        {% include '@DtwUser/Common/alerts/info.html.twig' %}
+    {% endif %}
+
+    {% if app.flashes('warning') is defined %}
+        {% include '@DtwUser/Common/alerts/warning.html.twig' %}
+    {% endif %}
+
+    {% if app.flashes('error') is defined %}
+        {% include '@DtwUser/Common/alerts/error.html.twig' %}
+    {% endif %}
+    {% block body %}
+
+    {% endblock body %}
+
+{% block javascripts %}{% endblock javascripts %}
+</body>
+</html>

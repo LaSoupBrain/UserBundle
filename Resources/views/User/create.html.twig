@@ -1,0 +1,17 @@
+{% extends "@DtwUser/Base/index.html.twig" %}
+
+{% block stylesheets %}
+    {#{{ parent() }}#}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/password-strength-meter@1.2.2/dist/password.min.css" integrity="sha256-V+gbO2e0sNon0tftdCs8J52KLEnhumk3FvNVA5R3iuM=" crossorigin="anonymous">
+{% endblock stylesheets %}
+
+{% block body %}
+    <h1 class="title">Create User</h1>
+    <p>This page is for creation of account</p>
+    {{ form_start(formCreate, {'action': path('dtw_user_add'), 'method': 'POST', 'attr' :{'novalidate':'novalidate', 'class': 'form__field', 'placeholder': 'Username'}}) }}
+    {{ form_end(formCreate) }}
+{% endblock body %}
+
+{% block javascripts %}
+{% endblock javascripts %}

@@ -1,0 +1,86 @@
+
+{% block body %}
+    <div class="login">
+        <div class="login-form">
+            <form
+                    action="{{ path('dtw_user_login') }}"
+                    method="post"
+            >
+                <h1 class="login-form__title">
+                    Login
+                </h1>
+
+                <label
+                        class="login-form__text"
+                        for="username"
+                >
+                    Email *
+                </label>
+
+                <input
+                        id="username"
+                        class="login-form__field"
+                        type="text"
+                        name="_username"
+                        value="{{ last_username }}"
+                        aria-describedby="emailHelp"
+                >
+                <label
+                        class="login-form__text"
+                        for="username"
+                >
+                    Password *
+                </label>
+
+                <input
+                        id="password"
+                        class="login-form__field"
+                        type="password"
+                        name="_password"
+                        aria-describedby="emailHelp"
+                >
+
+                {% if error %}
+                    <div class="login-form__text-error">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                <button
+                        type="submit"
+                        class="login-form__button"
+                >
+                    LOGIN
+                </button>
+            </form>
+
+            <a
+                    class="login-form__link"
+                    href="{{ path('dtw_user_forgot_password') }}"
+            >
+                Forgot Password?
+            </a>
+            <a
+                    class="login-form__link"
+                    href="{{ path('dtw_user_registration') }}"
+            >
+                Sign up
+            </a>
+            {% if app.flashes('success') is defined %}
+                {% include '@DtwUser/Common/alerts/success.html.twig' %}
+            {% endif %}
+
+            {% if app.flashes('info') is defined %}
+                {% include '@DtwUser/Common/alerts/info.html.twig' %}
+            {% endif %}
+
+            {% if app.flashes('warning') is defined %}
+                {% include '@DtwUser/Common/alerts/warning.html.twig' %}
+            {% endif %}
+
+            {% if app.flashes('error') is defined %}
+                {% include '@DtwUser/Common/alerts/error.html.twig' %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock body %}

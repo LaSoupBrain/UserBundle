@@ -1,0 +1,62 @@
+{% extends "@DtwUser/Base/index.html.twig" %}
+{%  block body %}
+      <div class="show-info">
+          <h1 class="title show-info__title">Delete User</h1>
+          <p class="show-info__text"><strong>ID:        </strong> {{ user.slugId }}</p>
+          <p class="show-info__text"><strong>Username:  </strong> {{ user.username }}</p>
+          <p class="show-info__text"><strong>Email:     </strong> {{ user.email }}</p>
+          <p class="show-info__text"><strong>Role:      </strong>
+          {% for role in user.roles %}
+              {{ role }}
+          {%  endfor %}
+          </p>
+          <p class="show-info__text"><strong>Created At:</strong> {{ user.createdAt|date("m/d/Y") }}</p>
+          <p class="show-info__text"><strong>Avatar:</strong></p>
+          <div class="show-info__img-holder">
+              <img src="{{ asset ('uploads/images/users/' ~ user.Avatar) }}" width="200" height="200">
+              <img src="{{ asset ('uploads/images/users/hover/' ~ user.hoverAvatar) }}" width="200" height="200">
+          </div>
+          <p class="show-info__text"><strong>Weight:</strong> {{ user.weight }}</p>
+          <p class="show-info__text"><strong>Name:</strong> {{ user.firstName }} {{ user.middleName }} {{ user.lastName }}</p>
+          <p class="show-info__text"><strong>Start Date:</strong> {{ user.startedAt |date('F j, Y') }}</p>
+          <p class="show-info__text"><strong>Designation:</strong> {{ user.designation }}</p>
+          <p class="show-info__text"><strong>Location:</strong> {{ user.location }}</p>
+          <p class="show-info__text"><strong>Slack:</strong> {{ user.slack }}</p>
+          <p class="show-info__text"><strong>Skype:</strong> {{ user.skype }}</p>
+          <p class="show-info__text"><strong>About:</strong></p>
+          <div class="show-info__description">{{ user.description|raw }}</div>
+          <p class="show-info__text"><strong>Date Created: </strong> {{ user.createdAt|date("m/d/Y") }}</p>
+          <br>
+          <a data-toggle="modal" data-target="user-display-{{ user.slugId }}" class="button button-danger modal_trigger">Delete</a>
+      </div>
+      <br><br>
+      <div
+            id="user-display-{{ user.slugId }}"
+            class="modal"
+      >
+              <div class="modal__body">
+                    <a
+                          class="modal__close"
+                    >
+                        <i class="fa fa-times"></i>
+                    </a>
+
+                    <div class="modal__content">
+
+                          <h6 class="title modal__title">Delete User</h6>
+                          <p>Are you sure you want to delete this record?</p>
+
+                          <a
+                                href="{{ path('dtw_user_delete', {'slugId':user.slugId }) }}"
+                                class="button button-danger"
+                                type="button"
+                          >
+                                      Delete
+                          </a>
+
+                          <button type="button" data-dismiss="modal" class="button modal__cancel">Cancel</button>
+
+                    </div>
+              </div>
+      </div>
+{% endblock %}

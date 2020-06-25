@@ -1,0 +1,42 @@
+{% extends "@DtwUser/Base/index.html.twig" %}
+
+{% block stylesheets %}{% endblock %}
+
+{% block body %}
+    <h1 class="title">User List</h1>
+    <p>list of user</p>
+    <br>
+    <a
+            class="button"
+            href="{{ path('dtw_user_create') }}"
+    >
+        ADD
+    </a>
+    <br><br>
+    {% include '@DtwUser/Common/pagination/pagination.html.twig' with {'paginationPath': 'dtw_user_pagination'} %}
+    <br>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Team</th>
+                <th>Designation</th>
+                <th colspan="2">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for user in users %}
+                <tr>
+                    <td><a href="{{ path('dtw_user_show', {'slugId': user.slugId }) }}">{{ user.slugId }}</a></td>
+                    <td>{{ user.firstName }} {{ user.middleName }} {{ user.lastName }}</td>
+                    <td>{{ user.designation }}</td>
+                    <td><a href="{{ path('dtw_user_edit', {'slugId': user.slugId }) }}" class="button">Update</a></td>
+                    <td><a href="{{ path('dtw_user_remove', {'slugId': user.slugId }) }}" class="button button-danger">Delete</a></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock body %}

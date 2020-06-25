@@ -1,0 +1,14 @@
+{% extends "@DtwUser/Base/index.html.twig" %}
+
+{% block stylesheets %}
+{% endblock stylesheets %}
+
+{% block body %}
+    <h1 class="title">Create User</h1>
+    <p>This page is for creation of account</p>
+    {{ form_start(formCreate, {'action': path('dtw_user_registered'), 'method': 'POST', 'attr' :{'novalidate':'novalidate', 'class': 'form__field', 'placeholder': 'Username'}}) }}
+    {{ form_end(formCreate) }}
+{% endblock body %}
+
+{% block javascripts %}
+{% endblock javascripts %}
