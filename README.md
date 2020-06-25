@@ -128,6 +128,13 @@ mailer_port: 587
 mailer_encryption: tls
 ````
  
+### Step 12: Add also in the security.yaml under access_control the ROLE_SUPER_ADMIN.
+Add this ROLE if you are going to use the Command Terminal for creating Super Admin Role. See example below.
+````
+    access_control:
+        - { path: ^/admin/, roles: [ROLE_ADMIN, ROLE_SUPER_ADMIN] }
+````
+ 
 ========================
 
 Now you can use the user bundle for add,show,update and delete a user. You can use also the login module.
